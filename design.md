@@ -1,0 +1,157 @@
+---
+authors: Rex Posadas (rexposadas@gmail.com)
+---
+
+# What we are building
+
+Take-home challenge for Level 4 Systems Engineer.
+
+This documentation is a design for a job worker service and its associated CLI.
+
+The implementation is meant to be minimal while meeting all challenge requirements. 
+Tradeoffs are noted in the `tradeoffs` section of this document.
+
+# Parts of the challenge:
+
+## Worker Library
+
+1. Has methods to start/stop/query status and stream logs from the jobs.
+1. Resource controls of CPU, memory and disk IO using cgroups.
+
+## API
+
+1. gRPC API to start/stop/get status/stream output of a running process.
+1. Use mTLS for authentication.
+1. Has a simple authentication scheme.
+
+## Client
+
+1. CLI connects to worker service to start, stop, get status, and stream output of a job.
+2. Multiple clients can connect to the service.
+
+
+# Design
+
+## Worker Library and Server
+
+The server will use a library to: 
+
+1. Start/stop and query jobs. Starting a job returns a UUID which is the job id. This ID can be used to do further 
+   actions on the job. 
+2. Provide streaming of job logs.
+
+Service should be able to handle multiple clients. 
+
+*cgroups* will be used to limit resources. 
+- Each job will run in its own cgroup.
+- Resource usage will be isolated per job.
+- There will be job_id grouping. for example: 
+  - /sys/fs/cgroup/teleport/<job_id> -- the job_id is the UUID provided by the server when the job was created.
+
+
+## API
+
+### Using gRPC for communication. 
+
+- Start: Starts a job with hardcoded resource limits.
+- Stop: Stops a job.
+- GetStatus: Fetches status of a job
+- GetLogs: Stream logs of a running job.
+
+```
+service TeleportService {
+    rpc Start (StartRequest) returns (StartResponse);
+    rpc Stop (StopRequest) returns (StopResponse);
+    rpc GetStatus (GetStatusRequest) returns (GetStatusResponse);
+    rpc GetLogs (GetLogsRequest) returns (stream GetLogsResponse);
+}
+```
+
+### Authentication
+
+mTLS will be used for authentication. Both server and client provides certificates in order to 
+communicate. For testing, premade certificates will be provided.
+
+Users are authorized to use the service by its certification being validated.
+
+The CLI will look for certificates in the `~/.certs`.  These are the necessary files:
+
+Server:
+- `~/certs/ca.pem`
+- `~/certs/service.pem`
+- `~/certs/service-key.pem`
+
+Client:
+- `~/certs/ca.pem` 
+- `~/certs/client-<id>.pem` 
+- `~/certs/client-key-<id>.pem`
+
+
+#### Tradeoffs
+- The root CA are self-signed. Production applications should use a well-trusted CA.
+- The CLI only looks at `~/certs` for certificates. That's hardcoded.  Adding that as a CLI option would be easy enough, but didn't think it was necessary for this challenge. 
+
+
+### Streaming logs
+
+We will use a broadcasting model to stream logs to multiple clients.  Logs, stored in-memory, are
+sent to the receivers.
+
+
+## Client
+
+The client/cli manages jobs and certificates.
+
+The CLI will be implemented using the [Cobra library](https://github.com/spf13/cobra) . 
+
+### Start the server
+
+> $ teleportd
+
+
+###  Managing jobs
+
+Below is an example of how to manage a job.
+
+>`teleport start` 
+
+>`teleport status <job_id>`  
+
+>`teleport logs <job_id>` 
+ 
+> `teleport stop <job_id>`
+
+
+1. `start` returns a `job id`, which is a UUID
+2. `status` fetches current status and resource usage.
+3. `logs` displays the logs of the job
+4. `stop` kills a job
+
+
+# Tradeoffs
+
+1. Logs are stored in-memory. In production, this is not recommended because of memory limits. Writing to files 
+   is better. 
+1. Geting a list of running jobs will not be implemented.
+1. Setting resource controls such as CPU and memory usage per job will be hardcoded. Ideally, it can be set via the 
+   CLI. Since we are using cgroups, we should be able to set different resource allocations per job.
+1. Hardcoded cgroup settings has downsides: 
+   1. This is not an efficient way to work with available resources. One can have jobs that 
+         will not make use of the allocated resources. While, other jobs might require more. 
+   1. If a job exceeds resources allocated unexpected behaviour might occur. This issue _might_ be hard to debug.
+1. There is no scheduler.
+1. The system will not scale and is not highly performant. 
+1. This system is not highly available.
+
+
+
+
+# Testing
+
+1. Authentication: User actions with valid and invalid credentials. 
+2. Server can handle multiple clients.
+3. Start/stop/get status of jobs
+
+
+
+
