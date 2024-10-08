@@ -42,12 +42,30 @@ The server will use a library to:
 
 Service should be able to handle multiple clients. 
 
-*cgroups* will be used to limit resources. 
+### cgroups
+
+`cgroups v2` will be used for resource control. 
+
 - Each job will run in its own cgroup.
 - Resource usage will be isolated per job.
 - There will be job_id grouping. for example: 
   - /sys/fs/cgroup/teleport/<job_id> -- the job_id is the UUID provided by the server when the job was created.
 
+The hardcoded resource limits are below. For this challenge, I will assume the jobs are relatively light: 
+- CPU: 0.5 
+- Memory: 256MB
+- IO: 1MB/s
+
+#### Placing jobs in cgroups
+
+- os.Open opens /sys/fs/cgroup/teleport/<job_id>, resulting in a file descriptor.
+- When running exec.Cmd, use UseCgroupFD and CgroupFD to specify that the process should be placed in a cgroup.
+
+
+#### Tradesoffs and the Production environment
+- It is preferable to dynamically configure resource limits based on job and system state. A first step in doing 
+  this is providing a way to adjust resource limits when jobs are created.
+- In production, we probably want orchestrators, like systemd, which manages cgroups. 
 
 ## API
 
@@ -65,7 +83,55 @@ service TeleportService {
     rpc GetStatus (GetStatusRequest) returns (GetStatusResponse);
     rpc GetLogs (GetLogsRequest) returns (stream GetLogsResponse);
 }
+
+message StartRequest {
+    string command = 1;
+    repeated string args = 2;
+}
+
+message StartResponse {
+    string job_id = 1; // a job UUID
+}
+
+message StopRequest {
+    string job_id = 1;
+}
+
+message StopResponse {
+    // ideally, add a boolean to see if stopping was successful
+    // maybe even a message. But not necessary for the challenge.
+}
+
+message GetStatusRequest {
+    string job_id = 1;
+}
+
+message GetStatusResponse {
+    Status status = 1;
+}
+
+enum Status{
+    STATUS_RUNNING = 1;
+    STATUS_STOPPED = 2;
+    STATUS_UNKNOWN = 3; // For anything we don't recognize
+}
+
+message LogsRequest {
+  string job_id = 1;
+}
+
+message LogsResponse {
+  bytes data = 1; // log data
+}
 ```
+
+#### Tradeoffs 
+- I do not distinguished a job which was stopped by a user or exited on its own. 
+
+### SSL
+
+And API will use TLs 1.3, which is the latest version. 
+
 
 ### Authentication
 
