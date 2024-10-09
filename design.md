@@ -132,7 +132,7 @@ message LogsResponse {
 }
 ```
 
-### SSL
+### TLS
 
 And API will use TLs 1.3, which is the latest version. 
 
