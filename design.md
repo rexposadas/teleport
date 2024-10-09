@@ -134,7 +134,8 @@ message LogsResponse {
 
 ### TLS
 
-And API will use TLs 1.3, which is the latest version. 
+API will use TLS 1.3, which is the latest version. 1.3 offers improved security and performance gains the previous 
+versions. 
 
 Recommended curves: 
 - X25519 : Performant and secure.
