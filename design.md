@@ -36,11 +36,17 @@ Tradeoffs are noted in the `tradeoffs` section of this document.
 
 The server will use a library to: 
 
-1. Start/stop and query jobs. Starting a job returns a UUID which is the job id. This ID can be used to do further 
-   actions on the job. 
-2. Provide streaming of job logs.
+1. Start a job. Starting a job returns a UUID which is the job id. This ID can be used to do further
+2. Stop a job. Sends SIGKILL to the process. SIGKILL instantly terminates the process.
+3. Query job.  Returns the status of a job. 
+4. Provide streaming of job logs.
 
 Service should be able to handle multiple clients. 
+
+### Tradeoffs and Production 
+- Initially using SIGTERM, then SIGKILL as a last resort is probably the better way to do things. But for this 
+  challenge, SIGKILL is sufficient.
+
 
 ### cgroups
 
@@ -130,13 +136,18 @@ message LogsResponse {
 
 And API will use TLs 1.3, which is the latest version. 
 
+Recommended Cipher suites. These are performant and offers good security:
+- TLS_AES_128_GCM_SHA256
+- TLS_CHACHA20_POLY1305_SHA256
+- TLS_AES_256_GCM_SHA384
 
 ### Authentication
 
 mTLS will be used for authentication. Both server and client provides certificates in order to 
 communicate. For testing, premade certificates will be provided.
 
-Users are authorized to use the service by its certification being validated.
+Users are authorized to use the service by its certification being validated. Validation is done by looking at the 
+Common Name (CN), which is part of the subject.
 
 The CLI will look for certificates in the `~/.certs`.  These are the necessary files:
 
@@ -154,7 +165,6 @@ Client:
 #### Tradeoffs
 - The root CA are self-signed. Production applications should use a well-trusted CA.
 - The CLI only looks at `~/certs` for certificates. That's hardcoded.  Adding that as a CLI option would be easy enough, but didn't think it was necessary for this challenge. 
-
 
 ### Streaming logs
 
