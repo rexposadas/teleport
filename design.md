@@ -170,8 +170,12 @@ Client:
 
 
 #### Tradeoffs
-- The root CA are self-signed. Production applications should use a well-trusted CA.
+- The root CA are self-signed. Production applications should use a well-trusted CA. 
+- There is a single Certificate Authority (CA) for both the client and server.  Having different CA for server 
+  and client is more secure. But for this challenge, a single CA is sufficient.
 - The CLI only looks at `~/certs` for certificates. That's hardcoded.  Adding that as a CLI option would be easy enough, but didn't think it was necessary for this challenge. 
+
+
 
 ### Streaming logs
 
