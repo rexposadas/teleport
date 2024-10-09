@@ -112,8 +112,9 @@ message GetStatusResponse {
 
 enum Status{
     STATUS_RUNNING = 1;
-    STATUS_STOPPED = 2;
-    STATUS_UNKNOWN = 3; // For anything we don't recognize
+    STATUS_STOPPED = 2; // User stopped the job
+    STATUS_EXITED = 3;  // Job exited
+    STATUS_UNKNOWN = 4; // For anything we don't recognize
 }
 
 message LogsRequest {
@@ -124,9 +125,6 @@ message LogsResponse {
   bytes data = 1; // log data
 }
 ```
-
-#### Tradeoffs 
-- I do not distinguished a job which was stopped by a user or exited on its own. 
 
 ### SSL
 
