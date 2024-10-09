@@ -136,6 +136,12 @@ message LogsResponse {
 
 And API will use TLs 1.3, which is the latest version. 
 
+Recommended curves: 
+- X25519 : Performant and secure.
+- P-256 : Widely supported and TLS 1.2 compatible.
+- P-384 : Higher level of security. Good for sensitive data.
+- P-521 : Very high security.
+
 Recommended Cipher suites. These are performant and offers good security:
 - TLS_AES_128_GCM_SHA256
 - TLS_CHACHA20_POLY1305_SHA256
