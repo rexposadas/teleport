@@ -174,9 +174,13 @@ Client:
 
 ### Streaming logs
 
-We will use a broadcasting model to stream logs to multiple clients.  Logs, stored in-memory, are
-sent to the receivers.
+We will use a pub/sub model to stream logs to multiple clients.  Logs, stored in-memory, are
+sent to the subscribers.
 
+- Server stores logs in an in-memory buffer (publisher).
+- Clients wanting logs subscribes to receive messages. (subscriber)
+- Common to pub/sub models, when a subscriber starts receiving logs, it gets what's in the buffer followed by the 
+  feed.  
 
 ## Client
 
