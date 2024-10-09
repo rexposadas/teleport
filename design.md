@@ -117,6 +117,7 @@ message GetStatusResponse {
 }
 
 enum Status{
+    STATUS_UNSPECIFIED = 0; 
     STATUS_RUNNING = 1;
     STATUS_STOPPED = 2; // User stopped the job
     STATUS_EXITED = 3;  // Job exited
