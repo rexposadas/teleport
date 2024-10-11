@@ -46,6 +46,8 @@ Service should be able to handle multiple clients.
 ### Tradeoffs and Production 
 - Initially using SIGTERM, then SIGKILL as a last resort is probably the better way to do things. But for this 
   challenge, SIGKILL is sufficient.
+- SIGKILL only kills the root process and not the child processes. SIGKILL is only sent is only sent to a  
+  specific process. In production, one might want a process group. Then, send the kill signal to the group lead.
 
 
 ### cgroups
