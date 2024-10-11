@@ -56,6 +56,7 @@ Service should be able to handle multiple clients.
 - Resource usage will be isolated per job.
 - There will be job_id grouping. for example: 
   - /sys/fs/cgroup/teleport/<job_id> -- the job_id is the UUID provided by the server when the job was created.
+- Use cpu.max, memory.max and io.max controllers to set resource values.
 
 The hardcoded resource limits are below. For this challenge, I will assume the jobs are relatively light: 
 - CPU: 0.5 
