@@ -194,6 +194,16 @@ sent to the subscribers.
 - Common to pub/sub models, when a subscriber starts receiving logs, it gets what's in the buffer followed by the 
   feed.
 - Both stdout and stderr will be logged.
+- Go primitives used:
+  - channels
+    - a channel is created for every client.  A client will listen to the channel for logs.
+  - go routines
+    - a go routine collects logs from stderr and stdout and puts it in an in-memory buffer. 
+    - A go routine is created to read logs from in-memory buffer sending them to the proper channels so that 
+      clients gets the logs. 
+  - a mutex is used in the in-memory buffer so that we can sync writing and reading from it.
+
+That's a general overview. Something might come up during the coding process that would change this plan. 
 
 ## Client
 
