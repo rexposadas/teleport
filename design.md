@@ -129,7 +129,7 @@ message LogsRequest {
 }
 
 message LogsResponse {
-  bytes data = 1; // log data
+  bytes data = 1; // log data (both stdout and stderr)
 }
 ```
 
@@ -156,6 +156,9 @@ communicate. For testing, premade certificates will be provided.
 
 Users are authorized to use the service by its certification being validated. Validation is done by looking at the 
 Common Name (CN), which is part of the subject.
+
+The ownership model would be such that there is a mapping between the user in the CN and job id.  This would 
+indicate what jobs a user can manage.
 
 The CLI will look for certificates in the `~/.certs`.  These are the necessary files:
 
@@ -186,7 +189,8 @@ sent to the subscribers.
 - Server stores logs in an in-memory buffer (publisher).
 - Clients wanting logs subscribes to receive messages. (subscriber)
 - Common to pub/sub models, when a subscriber starts receiving logs, it gets what's in the buffer followed by the 
-  feed.  
+  feed.
+- Both stdout and stderr will be logged.
 
 ## Client
 
