@@ -68,7 +68,7 @@ The hardcoded resource limits are below. For this challenge, I will assume the j
 - When running exec.Cmd, use UseCgroupFD and CgroupFD to specify that the process should be placed in a cgroup.
 
 
-#### Tradesoffs and the Production environment
+#### Trade offs and the Production environment
 - It is preferable to dynamically configure resource limits based on job and system state. A first step in doing 
   this is providing a way to adjust resource limits when jobs are created.
 - In production, we probably want orchestrators, like systemd, which manages cgroups. 
