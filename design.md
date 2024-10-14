@@ -37,18 +37,17 @@ Tradeoffs are noted in the `tradeoffs` section of this document.
 The server will use a library to: 
 
 1. Start a job. Starting a job returns a UUID which is the job id. This ID can be used to do further
-2. Stop a job. Sends SIGKILL to the process. SIGKILL instantly terminates the process.
+2. Stop a job. I place the process in the cgroup and kill the cgroup itself. That will remove all processes spawned by a job.
 3. Query job.  Returns the status of a job. 
 4. Provide streaming of job logs.
 
 Service should be able to handle multiple clients. 
 
+Sends SIGKILL to the process. SIGKILL in
+
 ### Tradeoffs and Production 
 - Initially using SIGTERM, then SIGKILL as a last resort is probably the better way to do things. But for this 
   challenge, SIGKILL is sufficient.
-- SIGKILL only kills the root process and not the child processes. SIGKILL is only sent is only sent to a  
-  specific process. In production, one might want a process group. Then, send the kill signal to the group lead.
-
 
 ### cgroups
 
@@ -64,6 +63,8 @@ The hardcoded resource limits are below. For this challenge, I will assume the j
 - CPU: 0.5 
 - Memory: 256MB
 - IO: 1MB/s
+
+For simplicity and for this challenge, I will assume there is only one block device /dev/sda with major/minor 8:0. 
 
 #### Placing jobs in cgroups
 
@@ -165,6 +166,8 @@ indicate what jobs a user can manage.
 
 The CLI will look for certificates in the `~/.certs`.  These are the necessary files:
 
+Certificates will use ECDSA as the signature algorithm.
+
 Server:
 - `~/certs/ca.pem`
 - `~/certs/service.pem`
@@ -174,6 +177,9 @@ Client:
 - `~/certs/ca.pem` 
 - `~/certs/client-<id>.pem` 
 - `~/certs/client-key-<id>.pem`
+
+To create certificates, I would use `make` (Makefile) targets to generate the certificates.
+For examples `make cert name=adam` will create the certificates for user adam.
 
 
 #### Tradeoffs
