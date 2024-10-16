@@ -31,7 +31,7 @@ func NewClient() *Client {
 }
 
 func (c *Client) Close() error {
-	return c.conn.Close() //nolint:wrapcheck // No wrap needed here.
+	return c.conn.Close()
 }
 
 func (c *Client) Start(ctx context.Context, cmd string, args []string) (*pb.StartResponse, error) {
