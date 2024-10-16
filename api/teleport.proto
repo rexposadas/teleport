@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package api.v1;
+
+option go_package = "github.com/rexposadas/teleport/api";
+
+service TeleportService {
+    rpc Start (StartRequest) returns (StartResponse);
+    rpc Stop (StopRequest) returns (StopResponse);
+    rpc GetStatus (GetStatusRequest) returns (GetStatusResponse);
+    rpc GetLogs (GetLogsRequest) returns (stream GetLogsResponse);
+}
+
+message StartRequest {
+    string command = 1;
+    repeated string args = 2;
+}
+
+message StartResponse {
+    string job_id = 1; // a job UUID
+}
+
+message StopRequest {
+    string job_id = 1;
+}
+
+message StopResponse {
+    // ideally, add a boolean to see if stopping was successful
+    // maybe even a message. But not necessary for the challenge.
+}
+
+message GetStatusRequest {
+    string job_id = 1;
+}
+
+message GetStatusResponse {
+    Status status = 1;
+}
+
+enum Status{
+    STATUS_UNSPECIFIED = 0;
+    STATUS_RUNNING = 1;
+    STATUS_STOPPED = 2; // User stopped the job
+    STATUS_EXITED = 3;  // Job exited
+    STATUS_UNKNOWN = 4; // For anything we don't recognize
+}
+
+message GetLogsRequest {
+  string job_id = 1;
+}
+
+message GetLogsResponse {
+  bytes data = 1; // log data (both stdout and stderr)
+}
